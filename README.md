@@ -2,7 +2,7 @@
 运行：go run main.go
 
 ## 一、上传接口（POST）
-http://127.0.0.1:3030/upload
+http://127.0.0.1:9090/upload
 
 Body：file
 
@@ -16,14 +16,14 @@ Body：file
 ```
 
 ## 二、下载接口（GET）
-http://127.0.0.1:3030/download
+http://127.0.0.1:9090/download
 
 参数：objectName
 
 返回示例：返回文件，浏览器自动跳转下载
 
 ## 三、删除接口（DELETE）
-http://127.0.0.1:3030/delete
+http://127.0.0.1:9090/delete
 
 参数：objectName
 
@@ -36,7 +36,7 @@ http://127.0.0.1:3030/delete
 ```
 
 ## 四、获取文件列表接口（GET）
-http://127.0.0.1:3030/list
+http://127.0.0.1:9090/list
 
 参数：无
 
@@ -61,4 +61,4 @@ http://127.0.0.1:3030/list
 ```
 
 ### 说明：
-阿里云OSS对象存储，上传同名文件会自动覆盖旧文件
+腾讯云COS对象存储，上传同名文件会自动覆盖旧文件

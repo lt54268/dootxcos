@@ -2,6 +2,7 @@ package model
 
 import (
 	"mime/multipart"
+	"time"
 )
 
 // Config 用于存储配置信息
@@ -21,7 +22,14 @@ type Uploader interface {
 
 // FileInfo 包含文件基本信息
 type FileInfo struct {
-	Key          string `json:"key"`
-	Size         int64  `json:"size"`
-	LastModified string `json:"last_modified"`
+	Key           string    `json:"key"`
+	ContentLength int64     `json:"content-length"`
+	ETag          string    `json:"etag"`
+	LastModified  time.Time `json:"last_modified"`
+}
+
+type UploadResponse struct {
+	ContentLength int64     `json:"content-length"`
+	ETag          string    `json:"etag"`
+	LastModified  time.Time `json:"last-modified"`
 }
