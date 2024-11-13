@@ -87,7 +87,6 @@ func DownloadFileHandler(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "参数缺失"
 // @Failure 500 {object} map[string]interface{} "文件删除失败"
 // @Router /api/v1/delete [delete]
-
 func DeleteFileHandler(c *gin.Context) {
 	// 从请求中获取文件名
 	objectName := c.Query("objectName")

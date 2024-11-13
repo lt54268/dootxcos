@@ -79,6 +79,38 @@ paths:
       summary: 拷贝文件
       tags:
       - 文件管理
+  /api/v1/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 处理文件删除请求
+      parameters:
+      - description: 文件对象名
+        in: query
+        name: objectName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文件删除成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 参数缺失
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 文件删除失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 删除文件
+      tags:
+      - 文件管理
   /api/v1/download:
     get:
       consumes:

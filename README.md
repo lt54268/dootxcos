@@ -1,6 +1,8 @@
 # 腾讯云OSS
 运行：go run main.go
 
+API文档：http://127.0.0.1:9090/swagger/index.html
+
 ## 一、上传接口（POST）
 http://127.0.0.1:9090/api/v1/upload
 
