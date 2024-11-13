@@ -10,16 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UploadHandler godoc
-// @Summary 上传文件到腾讯云 COS
-// @Description 接收文件并上传到腾讯云 COS
-// @Tags 文件操作
+// UploadHandler 上传文件接口
+// @Summary 上传文件
+// @Description 处理文件上传请求
+// @Tags 文件管理
 // @Accept multipart/form-data
 // @Produce json
-// @Param file formData file true "文件"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Router /upload_cos [post]
+// @Param file formData file true "上传的文件"
+// @Success 200 {object} model.UploadResponse "上传成功"
+// @Failure 400 {object} map[string]interface{} "文件解析失败"
+// @Failure 400 {object} map[string]interface{} "文件打开失败"
+// @Failure 400 {object} map[string]interface{} "上传失败"
+// @Router /api/v1/upload [post]
 func UploadHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -37,16 +39,25 @@ func UploadHandler(c *gin.Context) {
 
 	// 使用 CosUploader 上传文件流
 	uploader := service.NewCosUploader()
-	url, err := uploader.Upload(fileData, file.Filename)
+	info, err := uploader.Upload(fileData, file.Filename)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": fmt.Sprintf("上传失败: %v", err)})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "上传成功", "url": url})
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "上传成功", "data": info})
 }
 
-// DownloadCosFileHandler 下载文件接口
+// DownloadFileHandler 下载文件接口
+// @Summary 下载文件
+// @Description 处理文件下载请求
+// @Tags 文件管理
+// @Accept json
+// @Produce octet-stream
+// @Param object_Name query string true "文件对象名"
+// @Success 200 {file} []byte "文件数据"
+// @Failure 400 {object} map[string]interface{} "参数缺失或文件下载失败"
+// @Router /api/v1/download [get]
 func DownloadFileHandler(c *gin.Context) {
 	objectName := c.Query("object_Name")
 	if objectName == "" {
@@ -64,6 +75,18 @@ func DownloadFileHandler(c *gin.Context) {
 	// 设置响应头并返回文件数据
 	c.Data(http.StatusOK, "application/octet-stream", data)
 }
+
+// DeleteFileHandler 删除文件接口
+// @Summary 删除文件
+// @Description 处理文件删除请求
+// @Tags 文件管理
+// @Accept json
+// @Produce json
+// @Param objectName query string true "文件对象名"
+// @Success 200 {object} map[string]interface{} "文件删除成功"
+// @Failure 400 {object} map[string]interface{} "参数缺失"
+// @Failure 500 {object} map[string]interface{} "文件删除失败"
+// @Router /api/v1/delete [delete]
 
 func DeleteFileHandler(c *gin.Context) {
 	// 从请求中获取文件名
@@ -92,7 +115,15 @@ func DeleteFileHandler(c *gin.Context) {
 	})
 }
 
-// ListFilesHandler 处理获取文件列表请求
+// ListFilesHandler 获取文件列表接口
+// @Summary 获取文件列表
+// @Description 处理文件列表查询请求
+// @Tags 文件管理
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.FileInfo "文件列表"
+// @Failure 500 {object} map[string]interface{} "获取文件列表失败"
+// @Router /api/v1/list [get]
 func ListFilesHandler(c *gin.Context) {
 	lister := service.NewCosLister()
 	files, err := lister.List()
@@ -112,7 +143,22 @@ func ListFilesHandler(c *gin.Context) {
 	})
 }
 
-// CopyFileHandler 处理文件拷贝请求
+// CopyFileHandler 拷贝文件接口
+// @Summary 拷贝文件
+// @Description 处理文件拷贝请求，支持在不同存储桶之间拷贝文件
+// @Tags 文件管理
+// @Accept json
+// @Produce json
+// @Param srcBucket query string false "源存储桶" default(os.Getenv("COS_BUCKET"))
+// @Param srcObject query string true "源文件对象名"
+// @Param destBucket query string false "目标存储桶" default(srcBucket)
+// @Param destObject query string true "目标文件对象名"
+// @Param srcRegion query string false "源存储桶区域" default(os.Getenv("COS_REGION"))
+// @Param destRegion query string false "目标存储桶区域" default(os.Getenv("COS_REGION"))
+// @Success 200 {object} map[string]interface{} "文件拷贝成功"
+// @Failure 400 {object} map[string]interface{} "缺少必需的参数"
+// @Failure 500 {object} map[string]interface{} "文件拷贝失败"
+// @Router /api/v1/copy [post]
 func CopyFileHandler(c *gin.Context) {
 	// 获取请求参数
 	srcBucket := c.DefaultQuery("srcBucket", os.Getenv("COS_BUCKET"))
@@ -153,6 +199,22 @@ func CopyFileHandler(c *gin.Context) {
 	})
 }
 
+// MoveFileHandler 移动文件接口
+// @Summary 移动文件
+// @Description 处理文件移动请求，支持在同一存储桶或不同存储桶之间移动文件
+// @Tags 文件管理
+// @Accept json
+// @Produce json
+// @Param srcBucket query string false "源存储桶" default(os.Getenv("COS_BUCKET"))
+// @Param srcObject query string true "源文件对象名"
+// @Param destBucket query string false "目标存储桶" default(srcBucket)
+// @Param destObject query string true "目标文件对象名"
+// @Param srcRegion query string false "源存储桶区域" default(os.Getenv("COS_REGION"))
+// @Param destRegion query string false "目标存储桶区域" default(os.Getenv("COS_REGION"))
+// @Success 200 {object} map[string]interface{} "文件移动成功"
+// @Failure 400 {object} map[string]interface{} "缺少必需的参数"
+// @Failure 500 {object} map[string]interface{} "文件移动失败"
+// @Router /api/v1/move [post]
 func MoveFileHandler(c *gin.Context) {
 	// 获取请求参数
 	srcBucket := c.DefaultQuery("srcBucket", os.Getenv("COS_BUCKET"))

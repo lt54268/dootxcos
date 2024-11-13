@@ -1,0 +1,211 @@
+definitions:
+  model.FileInfo:
+    properties:
+      content-length:
+        type: integer
+      etag:
+        type: string
+      key:
+        type: string
+      last_modified:
+        type: string
+    type: object
+  model.UploadResponse:
+    properties:
+      content-length:
+        type: integer
+      etag:
+        type: string
+      last-modified:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/copy:
+    post:
+      consumes:
+      - application/json
+      description: 处理文件拷贝请求，支持在不同存储桶之间拷贝文件
+      parameters:
+      - default: os.Getenv("COS_BUCKET"
+        description: 源存储桶
+        in: query
+        name: srcBucket
+        type: string
+      - description: 源文件对象名
+        in: query
+        name: srcObject
+        required: true
+        type: string
+      - default: srcBucket
+        description: 目标存储桶
+        in: query
+        name: destBucket
+        type: string
+      - description: 目标文件对象名
+        in: query
+        name: destObject
+        required: true
+        type: string
+      - default: os.Getenv("COS_REGION"
+        description: 源存储桶区域
+        in: query
+        name: srcRegion
+        type: string
+      - default: os.Getenv("COS_REGION"
+        description: 目标存储桶区域
+        in: query
+        name: destRegion
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文件拷贝成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 缺少必需的参数
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 文件拷贝失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 拷贝文件
+      tags:
+      - 文件管理
+  /api/v1/download:
+    get:
+      consumes:
+      - application/json
+      description: 处理文件下载请求
+      parameters:
+      - description: 文件对象名
+        in: query
+        name: object_Name
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: 文件数据
+          schema:
+            type: file
+        "400":
+          description: 参数缺失或文件下载失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 下载文件
+      tags:
+      - 文件管理
+  /api/v1/list:
+    get:
+      consumes:
+      - application/json
+      description: 处理文件列表查询请求
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文件列表
+          schema:
+            $ref: '#/definitions/model.FileInfo'
+        "500":
+          description: 获取文件列表失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取文件列表
+      tags:
+      - 文件管理
+  /api/v1/move:
+    post:
+      consumes:
+      - application/json
+      description: 处理文件移动请求，支持在同一存储桶或不同存储桶之间移动文件
+      parameters:
+      - default: os.Getenv("COS_BUCKET"
+        description: 源存储桶
+        in: query
+        name: srcBucket
+        type: string
+      - description: 源文件对象名
+        in: query
+        name: srcObject
+        required: true
+        type: string
+      - default: srcBucket
+        description: 目标存储桶
+        in: query
+        name: destBucket
+        type: string
+      - description: 目标文件对象名
+        in: query
+        name: destObject
+        required: true
+        type: string
+      - default: os.Getenv("COS_REGION"
+        description: 源存储桶区域
+        in: query
+        name: srcRegion
+        type: string
+      - default: os.Getenv("COS_REGION"
+        description: 目标存储桶区域
+        in: query
+        name: destRegion
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文件移动成功
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 缺少必需的参数
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 文件移动失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 移动文件
+      tags:
+      - 文件管理
+  /api/v1/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 处理文件上传请求
+      parameters:
+      - description: 上传的文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            $ref: '#/definitions/model.UploadResponse'
+        "400":
+          description: 上传失败
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 上传文件
+      tags:
+      - 文件管理
+swagger: "2.0"
