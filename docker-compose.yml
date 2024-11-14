@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dootxcos-app
+    image: dootxcos-app:latest
+    ports:
+      - "6060:6060"
+    environment:
+      - PORT=6060
+      - COS_REGION=${COS_REGION}
+      - COS_ENDPOINT=${COS_ENDPOINT}
+      - COS_BUCKET=${COS_BUCKET}
+      - COS_SECRETID=${COS_SECRETID}
+      - COS_SECRETKEY=${COS_SECRETKEY}
+    env_file:
+      - .env
+    restart: always
+    

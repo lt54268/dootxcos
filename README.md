@@ -1,10 +1,10 @@
 # 腾讯云OSS
 运行：go run main.go
 
-API文档：http://127.0.0.1:9090/swagger/index.html
+API文档：http://127.0.0.1:6060/swagger/index.html
 
 ## 一、上传接口（POST）
-http://127.0.0.1:9090/api/v1/upload
+http://127.0.0.1:6060/api/v1/upload
 
 Body：file
 
@@ -22,14 +22,14 @@ Body：file
 ```
 
 ## 二、下载接口（GET）
-http://127.0.0.1:9090/api/v1/download
+http://127.0.0.1:6060/api/v1/download
 
 参数：objectName
 
 返回示例：返回文件，浏览器自动跳转下载
 
 ## 三、删除接口（DELETE）
-http://127.0.0.1:9090/api/v1/delete
+http://127.0.0.1:6060/api/v1/delete
 
 参数：objectName
 
@@ -42,7 +42,7 @@ http://127.0.0.1:9090/api/v1/delete
 ```
 
 ## 四、获取文件列表接口（GET）
-http://127.0.0.1:9090/api/v1/list
+http://127.0.0.1:6060/api/v1/list
 
 参数：无
 
@@ -67,7 +67,7 @@ http://127.0.0.1:9090/api/v1/list
 ```
 
 ## 五、拷贝接口（POST）
-http://127.0.0.1:9090/api/v1/copy
+http://127.0.0.1:6060/api/v1/copy
 
 参数：srcBucket、srcObject、destBucket、destObject
 
@@ -80,7 +80,7 @@ http://127.0.0.1:9090/api/v1/copy
 ```
 
 ## 六、移动接口（POST）
-http://127.0.0.1:9090/api/v1/move
+http://127.0.0.1:6060/api/v1/move
 
 参数：srcBucket、srcObject、destBucket、destObject
 
