@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"dootxcos/internal/service"
 
@@ -116,16 +117,34 @@ func DeleteFileHandler(c *gin.Context) {
 
 // ListFilesHandler 获取文件列表接口
 // @Summary 获取文件列表
-// @Description 处理文件列表查询请求
+// @Description 获取指定目录下的文件列表，并支持分页查询
 // @Tags 文件管理
 // @Accept json
 // @Produce json
-// @Success 200 {object} model.FileInfo "文件列表"
+// @Param prefix query string false "文件前缀"
+// @Param marker query string false "分页查询标记，继续上次查询的位置"
+// @Param limit query int false "每页返回的文件数，最大值为1000，默认为1000"
+// @Success 200 {object} map[string]interface{} "文件列表获取成功"
+// @Failure 400 {object} map[string]interface{} "Invalid limit parameter"
 // @Failure 500 {object} map[string]interface{} "获取文件列表失败"
 // @Router /api/v1/list [get]
 func ListFilesHandler(c *gin.Context) {
+	// 获取请求参数 Prefix、Marker、limit
+	prefix := c.DefaultQuery("prefix", "") // 默认为 ""
+	marker := c.DefaultQuery("marker", "")
+	limitParam := c.DefaultQuery("limit", "1000")
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":  400,
+			"msg":   "Invalid limit parameter",
+			"error": err.Error(),
+		})
+		return
+	}
+
 	lister := service.NewCosLister()
-	files, err := lister.List()
+	files, err := lister.List(prefix, marker, limit)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":  500,

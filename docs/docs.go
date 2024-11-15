@@ -185,7 +185,7 @@ const docTemplate = `{
         },
         "/api/v1/list": {
             "get": {
-                "description": "处理文件列表查询请求",
+                "description": "获取指定目录下的文件列表，并支持分页查询",
                 "consumes": [
                     "application/json"
                 ],
@@ -196,11 +196,39 @@ const docTemplate = `{
                     "文件管理"
                 ],
                 "summary": "获取文件列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件前缀",
+                        "name": "prefix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "分页查询标记，继续上次查询的位置",
+                        "name": "marker",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页返回的文件数，最大值为1000，默认为1000",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "文件列表",
+                        "description": "文件列表获取成功",
                         "schema": {
-                            "$ref": "#/definitions/model.FileInfo"
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid limit parameter",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "500": {
@@ -336,23 +364,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.FileInfo": {
-            "type": "object",
-            "properties": {
-                "content-length": {
-                    "type": "integer"
-                },
-                "etag": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "last_modified": {
-                    "type": "string"
-                }
-            }
-        },
         "model.UploadResponse": {
             "type": "object",
             "properties": {

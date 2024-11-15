@@ -44,7 +44,10 @@ http://127.0.0.1:6060/api/v1/delete
 ## 四、获取文件列表接口（GET）
 http://127.0.0.1:6060/api/v1/list
 
-参数：无
+参数（可选）：
+prefix（返回的文件前缀，留空默认全部返回）
+marker（游标，列举时继续读取上次的marker）
+limit（每次返回的文件数量，默认一次返回1000条数据）
 
 返回示例：
 ```
@@ -52,14 +55,16 @@ http://127.0.0.1:6060/api/v1/list
     "code": 200,
     "data": [
         {
-            "key": "10.14会议纪要.docx",
-            "size": 14077,
-            "last_modified": "2024-11-04 03:29:47"
+            "key": "11.05会议纪要.docx",
+            "content-length": 14567,
+            "etag": "\"8aXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\"",
+            "last_modified": "2024-11-15T02:51:46Z"
         },
         {
-            "key": "大模型测评报告.docx",
-            "size": 16530,
-            "last_modified": "2024-11-04 06:30:45"
+            "key": "cos-access-log/2024/11/13/202411131040_e4ddd146-5094-4f4b-80d9-88c8649b2f4d_000",
+            "content-length": 3270,
+            "etag": "\"45XXXXXXXXXXXXXXXXXXXXXXXXXXXXX\"",
+            "last_modified": "2024-11-13T03:21:46Z"
         }
     ],
     "msg": "文件列表获取成功"

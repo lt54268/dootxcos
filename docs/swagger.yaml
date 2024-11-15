@@ -1,15 +1,4 @@
 definitions:
-  model.FileInfo:
-    properties:
-      content-length:
-        type: integer
-      etag:
-        type: string
-      key:
-        type: string
-      last_modified:
-        type: string
-    type: object
   model.UploadResponse:
     properties:
       content-length:
@@ -141,14 +130,33 @@ paths:
     get:
       consumes:
       - application/json
-      description: 处理文件列表查询请求
+      description: 获取指定目录下的文件列表，并支持分页查询
+      parameters:
+      - description: 文件前缀
+        in: query
+        name: prefix
+        type: string
+      - description: 分页查询标记，继续上次查询的位置
+        in: query
+        name: marker
+        type: string
+      - description: 每页返回的文件数，最大值为1000，默认为1000
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: 文件列表
+          description: 文件列表获取成功
           schema:
-            $ref: '#/definitions/model.FileInfo'
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid limit parameter
+          schema:
+            additionalProperties: true
+            type: object
         "500":
           description: 获取文件列表失败
           schema:
