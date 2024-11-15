@@ -73,7 +73,6 @@ func DownloadFileHandler(c *gin.Context) {
 		return
 	}
 
-	// 设置响应头并返回文件数据
 	c.Data(http.StatusOK, "application/octet-stream", data)
 }
 
@@ -89,7 +88,6 @@ func DownloadFileHandler(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "文件删除失败"
 // @Router /api/v1/delete [delete]
 func DeleteFileHandler(c *gin.Context) {
-	// 从请求中获取文件名
 	objectName := c.Query("objectName")
 	if objectName == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -123,28 +121,28 @@ func DeleteFileHandler(c *gin.Context) {
 // @Produce json
 // @Param prefix query string false "文件前缀"
 // @Param marker query string false "分页查询标记，继续上次查询的位置"
-// @Param limit query int false "每页返回的文件数，最大值为1000，默认为1000"
+// @Param maxKeys query int false "每页返回的文件数，最大值为1000，默认为1000"
 // @Success 200 {object} map[string]interface{} "文件列表获取成功"
-// @Failure 400 {object} map[string]interface{} "Invalid limit parameter"
+// @Failure 400 {object} map[string]interface{} "Invalid maxKeys parameter"
 // @Failure 500 {object} map[string]interface{} "获取文件列表失败"
 // @Router /api/v1/list [get]
 func ListFilesHandler(c *gin.Context) {
-	// 获取请求参数 Prefix、Marker、limit
+	// 获取请求参数 Prefix、Marker、maxKeys
 	prefix := c.DefaultQuery("prefix", "") // 默认为 ""
 	marker := c.DefaultQuery("marker", "")
-	limitParam := c.DefaultQuery("limit", "1000")
-	limit, err := strconv.Atoi(limitParam)
+	maxKeysParam := c.DefaultQuery("maxKeys", "1000")
+	maxKeys, err := strconv.Atoi(maxKeysParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":  400,
-			"msg":   "Invalid limit parameter",
+			"msg":   "Invalid maxKeys parameter",
 			"error": err.Error(),
 		})
 		return
 	}
 
 	lister := service.NewCosLister()
-	files, err := lister.List(prefix, marker, limit)
+	files, nextMarker, err := lister.List(prefix, marker, maxKeys)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"code":  500,
@@ -155,9 +153,10 @@ func ListFilesHandler(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  "文件列表获取成功",
-		"data": files,
+		"code":       200,
+		"msg":        "文件列表获取成功",
+		"data":       files,
+		"nextMarker": nextMarker,
 	})
 }
 
@@ -242,7 +241,6 @@ func MoveFileHandler(c *gin.Context) {
 	srcRegion := c.DefaultQuery("srcRegion", os.Getenv("COS_REGION"))
 	destRegion := c.DefaultQuery("destRegion", os.Getenv("COS_REGION"))
 
-	// 验证必要的参数
 	if srcObject == "" || destObject == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": http.StatusBadRequest,

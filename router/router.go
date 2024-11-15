@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRoutes 设置 Gin 路由
+// 设置 Gin 路由
 func SetupRoutes(r *gin.Engine) {
 	v1 := r.Group("/api/v1")
 	{

@@ -142,7 +142,7 @@ paths:
         type: string
       - description: 每页返回的文件数，最大值为1000，默认为1000
         in: query
-        name: limit
+        name: maxKeys
         type: integer
       produces:
       - application/json
@@ -153,7 +153,7 @@ paths:
             additionalProperties: true
             type: object
         "400":
-          description: Invalid limit parameter
+          description: Invalid maxKeys parameter
           schema:
             additionalProperties: true
             type: object

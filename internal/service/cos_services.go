@@ -88,8 +88,8 @@ func (u *CosUploader) Upload(fileData multipart.File, objectName string) (*model
 	}
 
 	// 调用 List 方法获取刚上传的文件信息
-	lister := NewCosLister()                        // 创建 lister 实例
-	fileList, err := lister.List(objectName, "", 0) // 传递 objectName 作为 prefix 参数
+	lister := NewCosLister()                           // 创建 lister 实例
+	fileList, _, err := lister.List(objectName, "", 0) // 传递 objectName 作为 prefix 参数
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve uploaded file info: %v", err)
 	}
@@ -143,23 +143,23 @@ func (d *CosDeleter) Delete(objectName string) error {
 }
 
 // List 获取 COS 文件列表，格式化输出文件信息
-func (l *CosLister) List(prefix, marker string, limit int) ([]model.FileInfo, error) {
+func (l *CosLister) List(prefix, marker string, maxKeys int) ([]model.FileInfo, string, error) {
 	if prefix == "" {
 		prefix = "" // 默认 Prefix 为 *，返回所有对象
 	}
-	if limit == 0 {
-		limit = 1000 // 默认 MaxKeys 为 1000
+	if maxKeys == 0 {
+		maxKeys = 1000 // 默认 MaxKeys 为 1000
 	}
 
 	opt := &cos.BucketGetOptions{
 		Prefix:  prefix,
 		Marker:  marker,
-		MaxKeys: limit,
+		MaxKeys: maxKeys,
 	}
 
 	v, _, err := l.client.Bucket.Get(context.Background(), opt)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	var fileList []model.FileInfo
@@ -168,7 +168,7 @@ func (l *CosLister) List(prefix, marker string, limit int) ([]model.FileInfo, er
 		// 与阿里云返回的格式不一样
 		parsedTime, err := time.Parse(time.RFC3339, content.LastModified)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse LastModified: %v", err)
+			return nil, "", fmt.Errorf("failed to parse LastModified: %v", err)
 		}
 
 		fileList = append(fileList, model.FileInfo{
@@ -179,7 +179,13 @@ func (l *CosLister) List(prefix, marker string, limit int) ([]model.FileInfo, er
 		})
 	}
 
-	return fileList, nil
+	// 返回 NextMarker 作为下一次查询的起点
+	var nextMarker string
+	if v.IsTruncated {
+		nextMarker = v.NextMarker
+	}
+
+	return fileList, nextMarker, nil
 }
 
 func (c *CosCopier) CopyFile(srcBucket, srcObject, destBucket, destObject, srcRegion, destRegion string) error {

@@ -212,7 +212,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "每页返回的文件数，最大值为1000，默认为1000",
-                        "name": "limit",
+                        "name": "maxKeys",
                         "in": "query"
                     }
                 ],
@@ -225,7 +225,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid limit parameter",
+                        "description": "Invalid maxKeys parameter",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
